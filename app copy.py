@@ -100,7 +100,7 @@ def login():
             return jsonify({"error": "Credenziali non valide"}), 401
         # Legge e restituisce il file associato all'utente
         try:
-            return jsonify(user), 200
+                return jsonify(user), 200
         except FileNotFoundError:
             return jsonify({"error": "File associato non trovato"}), 404
 
@@ -296,8 +296,8 @@ def registrazione():
         # Scrive il file aggiornato
         with open(USERS_FILE, 'w',errors='ignore') as file:
             json.dump(utenti, file, indent=4)
-
-        return jsonify({"message": "Registrazione avvenuta con successo!", "data": nuovo_utente}), 201
+        
+        return jsonify(nuovo_utente), 201
 
     except FileNotFoundError:
         return jsonify({"error": "File users.json non trovato."}), 404
