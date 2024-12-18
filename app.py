@@ -15,7 +15,7 @@ def index():
     # Restituisce un template HTML
     return render_template('index.html')
 
-@app.route('/add-anime', methods=['POST'])  # Endpoint per aggiungere anime preferiti
+@app.route('/add-anime', methods=['GET'])  # Endpoint per aggiungere anime preferiti
 def add_anime():
     try:
         # Legge i dati dalla query string
@@ -318,6 +318,8 @@ def get_classifica():
 
         # Crea un dizionario con la classifica posizione-id anime
         classifica_lista = [{'idAnime': int(anime['id']), 'rank': rank} for rank, anime in enumerate(sorted(anime_list, key=lambda x: int(x['ranked'].strip('#'))), start=1)]
+
+        # Mi restustice un file json lista 
 
         return jsonify(classifica_lista), 200
 
