@@ -200,26 +200,33 @@ def get_anime_from_title(nome_anime):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-@app.route('/anime/trova/<id_anime>', methods=['GET'])
-def get_anime_from_id(id_anime):
+@app.route('/anime/trova', methods=['GET'])
+def get_anime_from_id():
     try:
+        id_anime = request.args.get('idAnime')  # Ottieni il valore della query string 'id_anime'
+        print("id_anime:", id_anime)
+        
+        if not id_anime:
+            return jsonify({"error": "ID dell'anime non fornito"}), 400
+        
         # Legge il file JSON con la lista degli anime
-        with open(ANIME_DB_FILE, 'r',errors='ignore') as file:
+        with open(ANIME_DB_FILE, 'r', errors='ignore') as file:
             anime_list = json.load(file)
 
         # Cerca l'anime corrispondente al nome dato
         risultato = next((anime for anime in anime_list if anime['id'] == int(id_anime)), None)
-
         if risultato:
-            return jsonify(risultato), 200, {'Content-Type': 'application/json'}
+            return jsonify(risultato), 200
         else:
             return jsonify({"error": "Anime non trovato"}), 404
 
     except FileNotFoundError:
         return jsonify({"error": "File non trovato"}), 404
+    except ValueError:
+        return jsonify({"error": "ID dell'anime non valido"}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/anime/preferiti/<id_utente>', methods=['GET'])
 def get_anime_preferiti(id_utente):
