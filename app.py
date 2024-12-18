@@ -58,7 +58,7 @@ def add_anime():
 def get_episodi_visti(id_utente, id_anime):
     try:
         # Carica i dati esistenti dal file
-        with open(ANIME_PREFERITI_FILE, 'r',encoding="uft-8") as file:
+        with open(ANIME_PREFERITI_FILE, 'r',errors='ignore') as file:
             preferiti = json.load(file)
 
         # Trova l'utente nel file preferiti
@@ -85,7 +85,7 @@ def get_episodi_visti(id_utente, id_anime):
 def login():
     try:
         # Carica il file users.json
-        with open(USERS_FILE, 'r',encoding="uft-8") as file:
+        with open(USERS_FILE, 'r',errors='ignore') as file:
             users = json.load(file)
 
         # Legge email e password dalla richiesta
@@ -113,7 +113,7 @@ def login():
 def get_utente_form_id():
     try:
             # Carica il file users.json
-        with open(USERS_FILE, 'r', encoding="utf-8") as file:
+        with open(USERS_FILE, 'r', errors='ignore') as file:
             users = json.load(file)
 
         print("users count:", len(users))
@@ -150,7 +150,7 @@ def get_anime_stagionali():
         file_path = os.path.abspath(ANIME_DB_FILE)
         print("Percorso del file:", file_path)  # Stampa il percorso per il debug
 
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r',errors='ignore') as file:
             data = json.load(file)
 
         # Filtra gli anime in base ai parametri
@@ -170,7 +170,7 @@ def get_anime_db():
         file_path = os.path.abspath("anime_db-utf8.json")
         print("Percorso del file:", file_path)  # Stampa il percorso per il debug
 
-        with open(file_path, 'r',encoding='utf-8-sig') as file:
+        with open(file_path, 'r',errors='ignore') as file:
             data = json.load(file)
 
         return jsonify(data), 200
@@ -184,7 +184,7 @@ def get_anime_db():
 def get_anime_from_title(nome_anime):
     try:
         # Legge il file JSON con la lista degli anime
-        with open(ANIME_DB_FILE, 'r') as file:
+        with open(ANIME_DB_FILE, 'r',errors='ignore') as file:
             anime_list = json.load(file)
 
         # Filtra gli anime che contengono il nome dato nel titolo
@@ -205,11 +205,11 @@ def get_anime_from_title(nome_anime):
 def get_anime_from_id(id_anime):
     try:
         # Legge il file JSON con la lista degli anime
-        with open(ANIME_DB_FILE, 'r') as file:
+        with open(ANIME_DB_FILE, 'r',errors='ignore') as file:
             anime_list = json.load(file)
 
         # Cerca l'anime corrispondente al nome dato
-        risultato = next((anime for anime in anime_list if anime['id'] == id_anime), None)
+        risultato = next((anime for anime in anime_list if anime['id'] == int(id_anime)), None)
 
         if risultato:
             return jsonify(risultato), 200, {'Content-Type': 'application/json'}
@@ -228,7 +228,7 @@ def get_anime_preferiti(id_utente):
         id_utente = int(id_utente)
 
         # Legge il file anime-preferiti.json
-        with open(ANIME_PREFERITI_FILE, 'r', encoding='utf-8') as file_preferiti:
+        with open(ANIME_PREFERITI_FILE, 'r', errors='ignore') as file_preferiti:
             preferiti = json.load(file_preferiti)
 
         # Trova l'utente specificato
@@ -241,7 +241,7 @@ def get_anime_preferiti(id_utente):
         id_anime_list = utente.get('idAnimes', [])
 
         # Legge il file anime-lista.json
-        with open(ANIME_DB_FILE, 'r', encoding='utf-8') as file_lista:
+        with open(ANIME_DB_FILE, 'r', errors='ignore') as file_lista:
             anime_lista = json.load(file_lista)
 
         # Trova gli anime corrispondenti agli ID
@@ -275,10 +275,10 @@ def registrazione():
         # Legge il file users.json
         if not os.path.exists(USERS_FILE):
             # Se il file non esiste, crealo con un array vuoto
-            with open(USERS_FILE, 'w') as file:
+            with open(USERS_FILE, 'w',errors='ignore') as file:
                 json.dump([], file)
 
-        with open(USERS_FILE, 'r') as file:
+        with open(USERS_FILE, 'r',errors='ignore') as file:
             utenti = json.load(file)
 
         # Verifica se l'email esiste già
@@ -290,7 +290,7 @@ def registrazione():
         utenti.append(nuovo_utente)
 
         # Scrive il file aggiornato
-        with open(USERS_FILE, 'w') as file:
+        with open(USERS_FILE, 'w',errors='ignore') as file:
             json.dump(utenti, file, indent=4)
 
         return jsonify({"message": "Registrazione avvenuta con successo!", "data": nuovo_utente}), 201
@@ -306,13 +306,13 @@ def get_classifica():
         if not os.path.exists(ANIME_DB_FILE):
             return jsonify({"error": "File ANIME_DB_FILE non trovato."}), 404
 
-        with open(ANIME_DB_FILE, 'r', encoding='utf-8') as file:
+        with open(ANIME_DB_FILE, 'r', errors='ignore') as file:
             anime_list = json.load(file)
 
         # Crea un dizionario con la classifica posizione-id anime
-        classifica = {int(i+1): anime['id'] for i, anime in enumerate(sorted(anime_list, key=lambda x: int(x['ranked'].strip('#'))))}
+        classifica_lista = [{'idAnime': int(anime['id']), 'rank': rank} for rank, anime in enumerate(sorted(anime_list, key=lambda x: int(x['ranked'].strip('#'))), start=1)]
 
-        return jsonify(classifica), 200
+        return jsonify(classifica_lista), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
