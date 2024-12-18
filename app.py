@@ -9,8 +9,7 @@ ANIME_PREFERITI_FILE = 'anime-preferiti.json'
 ANIME_DB_FILE = 'anime_db.json'
 USERS_FILE = 'users.json'
 
-# Inizializza il file anime-preferiti.json se non esiste
-
+# Esegui la correzione dei file JSON
 @app.route('/')
 def index():
     # Restituisce un template HTML
@@ -28,7 +27,7 @@ def add_anime():
             return jsonify({"error": "Dati non validi. Sono richiesti 'idUtente' e 'idAnime'."}), 400
 
         # Carica i dati esistenti dal file
-        with open(ANIME_PREFERITI_FILE, 'r') as file:
+        with open(ANIME_PREFERITI_FILE, 'r',encoding="uft-8") as file:
             preferiti = json.load(file)
 
         # Trova o crea l'utente nel file preferiti
@@ -59,7 +58,7 @@ def add_anime():
 def get_episodi_visti(id_utente, id_anime):
     try:
         # Carica i dati esistenti dal file
-        with open(ANIME_PREFERITI_FILE, 'r') as file:
+        with open(ANIME_PREFERITI_FILE, 'r',encoding="uft-8") as file:
             preferiti = json.load(file)
 
         # Trova l'utente nel file preferiti
@@ -86,7 +85,7 @@ def get_episodi_visti(id_utente, id_anime):
 def login():
     try:
         # Carica il file users.json
-        with open(USERS_FILE, 'r') as file:
+        with open(USERS_FILE, 'r',encoding="uft-8") as file:
             users = json.load(file)
 
         # Legge email e password dalla richiesta
@@ -105,6 +104,35 @@ def login():
             with open(user['data_file'], 'r') as data_file:
                 user_data = json.load(data_file)
             return jsonify(user_data), 200
+        except FileNotFoundError:
+            return jsonify({"error": "File associato non trovato"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+@app.route('/profilo', methods=['GET'])
+def get_utente_form_id():
+    try:
+            # Carica il file users.json
+        with open(USERS_FILE, 'r', encoding="utf-8") as file:
+            users = json.load(file)
+
+        print("users count:", len(users))
+        # Estrai l'ID dall'query string
+        user_id = request.args.get('idUtente')
+
+        print("User ID extracted from query string:", user_id)
+        print("Users[0] ID extracted from query string:", users[0]["id"])
+
+        # Cerca un utente con l'ID fornito
+        user = next((u for u in users if u['id'] == int(user_id)), None)
+
+
+        if not user:
+            return jsonify({"error": "Utente non trovato","idUtente":user_id}), 404
+
+        # Legge e restituisce il file associato all'utente
+        try:
+            return jsonify(user), 200
         except FileNotFoundError:
             return jsonify({"error": "File associato non trovato"}), 404
 
@@ -133,7 +161,25 @@ def get_anime_stagionali():
         return jsonify({"error": "File not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/anime-db', methods=['GET'])
+def get_anime_db():
+    try:
+        # Ottieni il percorso assoluto del file
+        file_path = os.path.abspath("anime_db-utf8.json")
+        print("Percorso del file:", file_path)  # Stampa il percorso per il debug
+
+        with open(file_path, 'r',encoding='utf-8-sig') as file:
+            data = json.load(file)
+
+        return jsonify(data), 200
+    except FileNotFoundError:
+        return jsonify({"error": "File not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     
+
 @app.route('/anime/trova/<nome_anime>', methods=['GET'])
 def get_anime_from_title(nome_anime):
     try:
@@ -182,7 +228,7 @@ def get_anime_preferiti(id_utente):
         id_utente = int(id_utente)
 
         # Legge il file anime-preferiti.json
-        with open(ANIME_PREFERITI_FILE, 'r') as file_preferiti:
+        with open(ANIME_PREFERITI_FILE, 'r', encoding='utf-8') as file_preferiti:
             preferiti = json.load(file_preferiti)
 
         # Trova l'utente specificato
@@ -195,7 +241,7 @@ def get_anime_preferiti(id_utente):
         id_anime_list = utente.get('idAnimes', [])
 
         # Legge il file anime-lista.json
-        with open(ANIME_DB_FILE, 'r') as file_lista:
+        with open(ANIME_DB_FILE, 'r', encoding='utf-8') as file_lista:
             anime_lista = json.load(file_lista)
 
         # Trova gli anime corrispondenti agli ID
@@ -207,8 +253,11 @@ def get_anime_preferiti(id_utente):
         return jsonify({"error": f"File non trovato: {str(e)}"}), 404
     except ValueError:
         return jsonify({"error": "L'ID utente deve essere un numero intero valido."}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except json.JSONDecodeError as e:
+        return jsonify({"error": f"Errore nella decodifica del file JSON: {str(e)}"}), 400
+    except UnicodeDecodeError as e:
+        return jsonify({"error": f"Errore di codifica: {str(e)}. Controlla la codifica del file."}), 400
+
     
 @app.route('/registrazione', methods=['POST'])
 def registrazione():
@@ -267,6 +316,7 @@ def get_classifica():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
 if __name__ == '__main__':

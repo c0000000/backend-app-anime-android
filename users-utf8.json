@@ -1,6 +1,5 @@
 [
     {
-        "id":0,
         "nome": "John",
         "cognome": "Doe",
         "data_nascita": "1990-01-01",
