@@ -53,6 +53,7 @@ def add_anime():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+
 @app.route('/anime/preferiti', methods=['GET'])
 def get_anime_preferitis():
     try:
@@ -61,39 +62,54 @@ def get_anime_preferitis():
         if not id_utente:
             return jsonify({"error": "idUtente è richiesto"}), 400
 
+        # Converte l'idUtente in intero
+        id_utente = int(id_utente)
+
         # Carica i dati dei preferiti dal file
         with open(ANIME_PREFERITI_FILE, 'r', errors="ignore") as file:
             preferiti_data = json.load(file)
 
-        print(preferiti_data)
         # Trova i preferiti dell'utente
         utente_preferiti = next(
             (item for item in preferiti_data if item['idUtente'] == id_utente), 
             None
         )
 
-        print(utente_preferiti)
         if not utente_preferiti:
             return jsonify({"error": f"Nessun preferito trovato per idUtente {id_utente}"}), 404
 
-        # Estrae gli idAnimes
-        id_animes = [anime['id'] for anime in utente_preferiti['idAnimes']]
+        # Estrae gli idAnimes con episodi visti
+        id_animes = utente_preferiti['idAnimes']
 
         # Carica i dati degli anime dal file
         with open(ANIME_DB_FILE, 'r', errors="ignore") as file:
             anime_data = json.load(file)
 
-        # Filtra gli anime in base agli idAnimes
-        anime_list = [anime for anime in anime_data if anime['id'] in id_animes]
+        # Filtra gli anime in base agli idAnimes e aggiunge gli episodi visti
+        anime_list = []
+        for anime_preferito in id_animes:
+            anime_id = anime_preferito['id']
+            episodi_visti = anime_preferito['episodiVisti']
+            
+            # Trova i dettagli dell'anime
+            anime = next((item for item in anime_data if item['id'] == anime_id), None)
+            if anime:
+                # Aggiunge i dettagli degli episodi visti
+                anime['episodiVisti'] = episodi_visti
+                anime_list.append(anime)
 
         return jsonify(anime_list), 200
 
+    except ValueError:
+        return jsonify({"error": "idUtente deve essere un numero intero"}), 400
     except FileNotFoundError as e:
         return jsonify({"error": f"File non trovato: {str(e)}"}), 500
     except json.JSONDecodeError as e:
         return jsonify({"error": f"Errore nel parsing del file JSON: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": f"Errore sconosciuto: {str(e)}"}), 500
+    
+
 
 @app.route('/episodi-visti/<id_utente>/<id_anime>', methods=['GET'])
 def get_episodi_visti(id_utente, id_anime):
