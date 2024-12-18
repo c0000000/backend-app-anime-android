@@ -270,7 +270,7 @@ def registrazione():
         nuovo_utente = request.json
 
         # Definisci i campi richiesti
-        campi_richiesti = ['email', 'password', 'username', 'nome', 'cognome', 'data_nascita']
+        campi_richiesti = ['email', 'password', 'username']
 
         # Controlla che il JSON contenga tutti i campi richiesti
         if not nuovo_utente or any(campo not in nuovo_utente for campo in campi_richiesti):
