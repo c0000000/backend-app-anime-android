@@ -52,7 +52,48 @@ def add_anime():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/anime/preferiti', methods=['GET'])
+def get_anime_preferitis():
+    try:
+        # Recupera l'idUtente dalla query string
+        id_utente = request.args.get('idUtente')
+        if not id_utente:
+            return jsonify({"error": "idUtente è richiesto"}), 400
 
+        # Carica i dati dei preferiti dal file
+        with open(ANIME_PREFERITI_FILE, 'r', errors="ignore") as file:
+            preferiti_data = json.load(file)
+
+        print(preferiti_data)
+        # Trova i preferiti dell'utente
+        utente_preferiti = next(
+            (item for item in preferiti_data if item['idUtente'] == id_utente), 
+            None
+        )
+
+        print(utente_preferiti)
+        if not utente_preferiti:
+            return jsonify({"error": f"Nessun preferito trovato per idUtente {id_utente}"}), 404
+
+        # Estrae gli idAnimes
+        id_animes = [anime['id'] for anime in utente_preferiti['idAnimes']]
+
+        # Carica i dati degli anime dal file
+        with open(ANIME_DB_FILE, 'r', errors="ignore") as file:
+            anime_data = json.load(file)
+
+        # Filtra gli anime in base agli idAnimes
+        anime_list = [anime for anime in anime_data if anime['id'] in id_animes]
+
+        return jsonify(anime_list), 200
+
+    except FileNotFoundError as e:
+        return jsonify({"error": f"File non trovato: {str(e)}"}), 500
+    except json.JSONDecodeError as e:
+        return jsonify({"error": f"Errore nel parsing del file JSON: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Errore sconosciuto: {str(e)}"}), 500
 
 @app.route('/episodi-visti/<id_utente>/<id_anime>', methods=['GET'])
 def get_episodi_visti(id_utente, id_anime):
@@ -142,7 +183,7 @@ def get_anime_stagionali():
         # Ottieni i parametri dalla queryString
         anno = request.args.get('anno')
         stagione = request.args.get('stagione')
-
+        stagione = stagione.capitalize()
         # Ottieni il percorso assoluto del file
         file_path = os.path.abspath(ANIME_DB_FILE)
         print("Percorso del file:", file_path)  # Stampa il percorso per il debug
@@ -270,7 +311,7 @@ def registrazione():
         nuovo_utente = request.json
 
         # Definisci i campi richiesti
-        campi_richiesti = ['email', 'password', 'username', 'nome', 'cognome', 'data_nascita']
+        campi_richiesti = ['email', 'password', 'username']
 
         # Controlla che il JSON contenga tutti i campi richiesti
         if not nuovo_utente or any(campo not in nuovo_utente for campo in campi_richiesti):
