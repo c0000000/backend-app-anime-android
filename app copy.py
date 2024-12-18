@@ -14,20 +14,19 @@ USERS_FILE = 'users.json'
 def index():
     # Restituisce un template HTML
     return render_template('index.html')
-
-@app.route('/add-anime', methods=['POST'])  # Endpoint per aggiungere anime preferiti
+@app.route('/add-anime', methods=['GET'])  # Endpoint per aggiungere anime preferiti
 def add_anime():
     try:
-        # Legge i dati dalla query string
-        id_utente = request.args.get('idUtente')
-        id_anime = request.args.get('idAnime')
+        # Legge i dati dalla query string e li converte in interi
+        id_utente = int(request.args.get('idUtente'))
+        id_anime = int(request.args.get('idAnime'))
 
         # Controlla che i parametri siano presenti
-        if not id_utente or not id_anime:
-            return jsonify({"error": "Dati non validi. Sono richiesti 'idUtente' e 'idAnime'."}), 400
+        
+        print(f"Aggiunta anime preferito utente {id_utente} - anime {id_anime}")
 
         # Carica i dati esistenti dal file
-        with open(ANIME_PREFERITI_FILE, 'r',encoding="uft-8") as file:
+        with open(ANIME_PREFERITI_FILE, 'r', errors="ignore") as file:
             preferiti = json.load(file)
 
         # Trova o crea l'utente nel file preferiti
@@ -52,7 +51,7 @@ def add_anime():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 
 @app.route('/anime/preferiti', methods=['GET'])
 def get_anime_preferitis():
