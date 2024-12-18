@@ -221,7 +221,7 @@ def get_anime_stagionali():
 def get_anime_db():
     try:
         # Ottieni il percorso assoluto del file
-        file_path = os.path.abspath("anime_db-utf8.json")
+        file_path = os.path.abspath(ANIME_DB_FILE)
         print("Percorso del file:", file_path)  # Stampa il percorso per il debug
 
         with open(file_path, 'r',errors='ignore') as file:
