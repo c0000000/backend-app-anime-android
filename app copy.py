@@ -98,12 +98,9 @@ def login():
 
         if not user:
             return jsonify({"error": "Credenziali non valide"}), 401
-
         # Legge e restituisce il file associato all'utente
         try:
-            with open(user['data_file'], 'r') as data_file:
-                user_data = json.load(data_file)
-            return jsonify(user_data), 200
+            return jsonify(user), 200
         except FileNotFoundError:
             return jsonify({"error": "File associato non trovato"}), 404
 
