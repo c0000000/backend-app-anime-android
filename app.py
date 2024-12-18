@@ -16,19 +16,16 @@ def index():
     # Restituisce un template HTML
     return render_template('index.html')
 
-
 @app.route('/add-anime', methods=['POST'])  # Endpoint per aggiungere anime preferiti
 def add_anime():
     try:
-        # Legge i dati dalla richiesta
-        data = request.json
+        # Legge i dati dalla query string
+        id_utente = request.args.get('idUtente')
+        id_anime = request.args.get('idAnime')
 
-        # Controlla che i dati contengano i campi richiesti
-        if not data or 'idUtente' not in data or 'idAnime' not in data:
+        # Controlla che i parametri siano presenti
+        if not id_utente or not id_anime:
             return jsonify({"error": "Dati non validi. Sono richiesti 'idUtente' e 'idAnime'."}), 400
-
-        id_utente = data['idUtente']
-        id_anime = data['idAnime']
 
         # Carica i dati esistenti dal file
         with open(ANIME_PREFERITI_FILE, 'r') as file:
@@ -39,31 +36,50 @@ def add_anime():
 
         if utente_esistente:
             # Aggiunge l'idAnime alla lista dell'utente, evitando duplicati
-            if id_anime not in utente_esistente['idAnime']:
-                utente_esistente['idAnime'].append(id_anime)
+            if id_anime not in [anime['id'] for anime in utente_esistente['idAnimes']]:
+                utente_esistente['idAnimes'].append({"id": id_anime, "episodiVisti": 0})
         else:
             # Crea un nuovo utente con il suo primo anime preferito
             preferiti.append({
                 "idUtente": id_utente,
-                "idAnimes": [{"id":id_anime,"episodiVisti": 0}]
+                "idAnimes": [{"id": id_anime, "episodiVisti": 0}]
             })
 
         # Scrive i dati aggiornati nel file
         with open(ANIME_PREFERITI_FILE, 'w') as file:
             json.dump(preferiti, file, indent=4)
 
-        return jsonify({"message": "Anime aggiunto con successo!", "data": data}), 201
+        return jsonify({"message": "Anime aggiunto con successo!", "data": {"idUtente": id_utente, "idAnime": id_anime}}), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-
 @app.route('/episodi-visti/<id_utente>/<id_anime>', methods=['GET'])
 def get_episodi_visti(id_utente, id_anime):
-    #episodi-visti - get dato un idUtente
+    try:
+        # Carica i dati esistenti dal file
+        with open(ANIME_PREFERITI_FILE, 'r') as file:
+            preferiti = json.load(file)
 
-    print("Getting")
+        # Trova l'utente nel file preferiti
+        utente = next((item for item in preferiti if item['idUtente'] == id_utente), None)
+
+        if not utente:
+            return jsonify({"error": "Utente non trovato."}), 404
+
+        # Trova l'anime specifico per l'utente
+        anime = next((anime for anime in utente['idAnimes'] if anime['id'] == id_anime), None)
+
+        if not anime:
+            return jsonify({"error": "Anime non trovato per questo utente."}), 404
+
+        # Restituisce l'intero oggetto dell'anime, inclusi gli episodi visti
+        return jsonify(anime), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 @app.route('/login', methods=['POST'])
