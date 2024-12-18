@@ -1,3 +1,16 @@
 [
-    
+    {
+        "idUtente": 0,
+        "idAnimes": [
+          {
+            "id": 43299,
+            "episodiVisti": 0
+          },
+          {
+            "id": 37521,
+            "episodiVisti": 10
+          }
+        ]
+      }
+       
 ]
