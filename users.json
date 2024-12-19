@@ -89,5 +89,41 @@
         "id": 658506320,
         "password": "pp",
         "username": "pp"
+    },
+    {
+        "email": "ric",
+        "id": -1664662120,
+        "password": "ric",
+        "username": "ric"
+    },
+    {
+        "email": "qaz@qaz.com",
+        "id": 603665405,
+        "password": "1234",
+        "username": "qaz"
+    },
+    {
+        "email": "ricc@ricc.com",
+        "id": 1841229665,
+        "password": "12345",
+        "username": "riccardo"
+    },
+    {
+        "email": "roma",
+        "id": 848412676,
+        "password": "porno",
+        "username": "dajje"
+    },
+    {
+        "email": "test",
+        "id": -544058025,
+        "password": "test",
+        "username": "test"
+    },
+    {
+        "email": "ff",
+        "id": 388457721,
+        "password": "ff",
+        "username": "f"
     }
 ]

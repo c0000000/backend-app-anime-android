@@ -1,4 +1,3 @@
-Ecco una versione migliorata e più compatta della documentazione con la struttura e i parametri richiesti:
 
 | **Endpoint**         | **Metodi** | **Descrizione**                                                                              | **Parametri**                                                                                           | **Return**                                                                                               |
 |---------------------|-------------|--------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
@@ -23,4 +22,3 @@ Ecco una versione migliorata e più compatta della documentazione con la struttu
   - I dati richiesti (come gli anime preferiti, i dati dell'utente, gli anime stagionali, ecc.).
   - Status code HTTP appropriato (200 per successo, 400 per errore di input, 404 per non trovato, 409 per conflitto, ecc.).
 
-Questa struttura compatta facilita una rapida comprensione della funzione e delle operazioni di ciascun endpoint.
